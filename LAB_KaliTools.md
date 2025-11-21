@@ -1,0 +1,312 @@
+# Práctica de laboratorio - Análisis de vulnerabilidades con Kali Tools
+## Objetivos
+En esta práctica de laboratorio, explorará las herramientas de escaneo de vulnerabilidades de la red y las utilizará para realizar un escaneo de vulnerabilidades en un host de destino.
+
+- Realice escaneos de red con Nmap.
+- Utilice la administración de vulnerabilidades de Greenbone para realizar un escaneo de vulnerabilidades.
+
+## Trasfondo / Escenario
+En una práctica de laboratorio anterior, utilizó Nmap para enumerar una computadora host que estaba creando un tráfico inusual en la red. En esta práctica de laboratorio, utilizará Nmap y Greenbone Vulnerability Management (GVM) para escanear el sistema e identificar posibles vulnerabilidades.
+
+## Recursos necesarios
+- Kali VM personalizada para el curso de Ethical Hacker
+- Acceso a Internet
+
+## Parte 1: Ejecutar un escaneo de Nmap en un equipo de destino
+En esta parte, utilizará los scripts (guiones) de Nmap y NSE para descubrir posibles vulnerabilidades en un host de destino.
+
+__Paso 1: Inicie e inicie sesión en la máquina virtual Kali__
+- Inicie y comience la sesión en la máquina virtual Kali.
+- Inicie una sesión de terminal. Expanda la ventana del terminal a pantalla completa. Utilice el comando ping para determinar si se puede acceder a la computadora con la dirección 10.6.6.23 o gravemind.vm.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ ping -c5 10.6.6.23
+```
+La opción -c5 le indica al comando ping que se detenga después de cinco intentos. En Linux, cuando no se especifica una opción -c, el comando ping continuará indefinidamente hasta que se emita CTRL-C.
+
+__Paso 2: Identifique los puertos y servicios abiertos__
+- Revise los resultados de un escaneo de Nmap en el host con la dirección IP 10.6.6.23.
+- Ejecute un escaneo de ping del host de destino con el comando nmap -sV. Tenga en cuenta la lista de puertos y aplicaciones que se detectan en el host.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ nmap -sV 10.6.6.23
+```
+Identifique el sistema operativo que se ejecuta en el equipo de destino mediante el comando nmap -O.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ sudo nmap -O 10.6.6.23
+```
+__Paso 3: Utilice el script de Nmap Vulners para buscar vulnerabilidades__<br>
+El guion de Vulners muestra las vulnerabilidades conocidas y la CVE correspondiente. El guion de Vulners utiliza la información de versión de software y puerto abierto para buscar nombres de enumeración de plataforma común (CPE) que se relacionan con el servicio identificado. Luego realiza una solicitud a un servidor remoto para averiguar si existe alguna vulnerabilidad conocida para ese CPE.
+
+Utilice el comando nmap –script para iniciar el guion vulners. La sintaxis del comando es nmap -sV --script vulners [--script-args mincvss=] donde el argumento de guion mincvss restringe la salida solo a aquellas CVE que tienen una puntuación CVSS más alta que la especificada en el argumento.
+Las vulnerabilidades informadas serán aquellas con una puntuación CVE igual o superior a 4. La salida del comando debe ser similar a la que se muestra a continuación.
+<!-- nmap -sV --script vulners --script-args mincvss=4 10.6.6.23 -->
+```bash
+──(root㉿Kali)-[/home/kali]
+└─# nmap -sV --script vulners --script-args mincvss=4 10.6.6.23                                                                                                                                                                             
+Starting Nmap 7.94 ( https://nmap.org ) at 2025-11-21 22:16 UTC
+Nmap scan report for gravemind.vm (10.6.6.23)
+Host is up (0.0000050s latency).
+Not shown: 994 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+| vulners: 
+|   vsftpd 3.0.3: 
+|       CVE-2021-30047  7.5     https://vulners.com/cve/CVE-2021-30047
+|_      CVE-2021-3618   7.4     https://vulners.com/cve/CVE-2021-3618
+22/tcp  open  ssh         OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
+| vulners: 
+|   cpe:/a:openbsd:openssh:7.9p1: 
+|       PACKETSTORM:173661      9.8     https://vulners.com/packetstorm/PACKETSTORM:173661      *EXPLOIT*
+|       F0979183-AE88-53B4-86CF-3AF0523F3807    9.8     https://vulners.com/githubexploit/F0979183-AE88-53B4-86CF-3AF0523F3807  *EXPLOIT*
+|       CVE-2023-38408  9.8     https://vulners.com/cve/CVE-2023-38408
+|       B8190CDB-3EB9-5631-9828-8064A1575B23    9.8     https://vulners.com/githubexploit/B8190CDB-3EB9-5631-9828-8064A1575B23  *EXPLOIT*
+|       8FC9C5AB-3968-5F3C-825E-E8DB5379A623    9.8     https://vulners.com/githubexploit/8FC9C5AB-3968-5F3C-825E-E8DB5379A623  *EXPLOIT*
+|       8AD01159-548E-546E-AA87-2DE89F3927EC    9.8     https://vulners.com/githubexploit/8AD01159-548E-546E-AA87-2DE89F3927EC  *EXPLOIT*
+|       2227729D-6700-5C8F-8930-1EEAFD4B9FF0    9.8     https://vulners.com/githubexploit/2227729D-6700-5C8F-8930-1EEAFD4B9FF0  *EXPLOIT*
+|       0221525F-07F5-5790-912D-F4B9E2D1B587    9.8     https://vulners.com/githubexploit/0221525F-07F5-5790-912D-F4B9E2D1B587  *EXPLOIT*
+|       BA3887BD-F579-53B1-A4A4-FF49E953E1C0    8.1     https://vulners.com/githubexploit/BA3887BD-F579-53B1-A4A4-FF49E953E1C0  *EXPLOIT*
+|       4FB01B00-F993-5CAF-BD57-D7E290D10C1F    8.1     https://vulners.com/githubexploit/4FB01B00-F993-5CAF-BD57-D7E290D10C1F  *EXPLOIT*
+|       CVE-2020-15778  7.8     https://vulners.com/cve/CVE-2020-15778
+|       CVE-2019-16905  7.8     https://vulners.com/cve/CVE-2019-16905
+|       C94132FD-1FA5-5342-B6EE-0DAF45EEFFE3    7.8     https://vulners.com/githubexploit/C94132FD-1FA5-5342-B6EE-0DAF45EEFFE3  *EXPLOIT*
+|       2E719186-2FED-58A8-A150-762EFBAAA523    7.8     https://vulners.com/gitee/2E719186-2FED-58A8-A150-762EFBAAA523  *EXPLOIT*
+|       23CC97BE-7C95-513B-9E73-298C48D74432    7.8     https://vulners.com/githubexploit/23CC97BE-7C95-513B-9E73-298C48D74432  *EXPLOIT*
+|       10213DBE-F683-58BB-B6D3-353173626207    7.8     https://vulners.com/githubexploit/10213DBE-F683-58BB-B6D3-353173626207  *EXPLOIT*
+|       SSV:92579       7.5     https://vulners.com/seebug/SSV:92579    *EXPLOIT*
+|       1337DAY-ID-26576        7.5     https://vulners.com/zdt/1337DAY-ID-26576        *EXPLOIT*
+|       CVE-2021-41617  7.0     https://vulners.com/cve/CVE-2021-41617
+|       284B94FC-FD5D-5C47-90EA-47900DAD1D1E    7.0     https://vulners.com/githubexploit/284B94FC-FD5D-5C47-90EA-47900DAD1D1E  *EXPLOIT*
+|       PACKETSTORM:189283      6.8     https://vulners.com/packetstorm/PACKETSTORM:189283      *EXPLOIT*
+|       EDB-ID:46516    6.8     https://vulners.com/exploitdb/EDB-ID:46516      *EXPLOIT*
+|       EDB-ID:46193    6.8     https://vulners.com/exploitdb/EDB-ID:46193      *EXPLOIT*
+|       CVE-2025-26465  6.8     https://vulners.com/cve/CVE-2025-26465
+|       CVE-2019-6110   6.8     https://vulners.com/cve/CVE-2019-6110
+|       CVE-2019-6109   6.8     https://vulners.com/cve/CVE-2019-6109
+|       9D8432B9-49EC-5F45-BB96-329B1F2B2254    6.8     https://vulners.com/githubexploit/9D8432B9-49EC-5F45-BB96-329B1F2B2254  *EXPLOIT*
+|       85FCDCC6-9A03-597E-AB4F-FA4DAC04F8D0    6.8     https://vulners.com/githubexploit/85FCDCC6-9A03-597E-AB4F-FA4DAC04F8D0  *EXPLOIT*
+|       1337DAY-ID-39918        6.8     https://vulners.com/zdt/1337DAY-ID-39918        *EXPLOIT*
+|       1337DAY-ID-32328        6.8     https://vulners.com/zdt/1337DAY-ID-32328        *EXPLOIT*
+|       1337DAY-ID-32009        6.8     https://vulners.com/zdt/1337DAY-ID-32009        *EXPLOIT*
+|       D104D2BF-ED22-588B-A9B2-3CCC562FE8C0    6.5     https://vulners.com/githubexploit/D104D2BF-ED22-588B-A9B2-3CCC562FE8C0  *EXPLOIT*
+|       CVE-2023-51385  6.5     https://vulners.com/cve/CVE-2023-51385
+|       C07ADB46-24B8-57B7-B375-9C761F4750A2    6.5     https://vulners.com/githubexploit/C07ADB46-24B8-57B7-B375-9C761F4750A2  *EXPLOIT*
+|       A88CDD3E-67CC-51CC-97FB-AB0CACB6B08C    6.5     https://vulners.com/githubexploit/A88CDD3E-67CC-51CC-97FB-AB0CACB6B08C  *EXPLOIT*
+|       65B15AA1-2A8D-53C1-9499-69EBA3619F1C    6.5     https://vulners.com/githubexploit/65B15AA1-2A8D-53C1-9499-69EBA3619F1C  *EXPLOIT*
+|       5325A9D6-132B-590C-BDEF-0CB105252732    6.5     https://vulners.com/gitee/5325A9D6-132B-590C-BDEF-0CB105252732  *EXPLOIT*
+|       530326CF-6AB3-5643-AA16-73DC8CB44742    6.5     https://vulners.com/githubexploit/530326CF-6AB3-5643-AA16-73DC8CB44742  *EXPLOIT*
+|       CVE-2023-48795  5.9     https://vulners.com/cve/CVE-2023-48795
+|       CVE-2020-14145  5.9     https://vulners.com/cve/CVE-2020-14145
+|       CVE-2019-6111   5.9     https://vulners.com/cve/CVE-2019-6111
+|       CNVD-2021-25272 5.9     https://vulners.com/cnvd/CNVD-2021-25272
+|       6D74A425-60A7-557A-B469-1DD96A2D8FF8    5.9     https://vulners.com/githubexploit/6D74A425-60A7-557A-B469-1DD96A2D8FF8  *EXPLOIT*
+|       EXPLOITPACK:98FE96309F9524B8C84C508837551A19    5.8     https://vulners.com/exploitpack/EXPLOITPACK:98FE96309F9524B8C84C508837551A19    *EXPLOIT*
+|       EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97    5.8     https://vulners.com/exploitpack/EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97    *EXPLOIT*
+|       CVE-2018-20685  5.3     https://vulners.com/cve/CVE-2018-20685
+|       CVE-2016-20012  5.3     https://vulners.com/cve/CVE-2016-20012
+|       CNVD-2019-01296 5.3     https://vulners.com/cnvd/CNVD-2019-01296
+|       CVE-2025-32728  4.3     https://vulners.com/cve/CVE-2025-32728
+|       PACKETSTORM:151227      0.0     https://vulners.com/packetstorm/PACKETSTORM:151227      *EXPLOIT*
+|_      PACKETSTORM:140261      0.0     https://vulners.com/packetstorm/PACKETSTORM:140261      *EXPLOIT*
+53/tcp  open  domain      ISC BIND 9.11.5-P4-5.1+deb10u5 (Debian Linux)
+| vulners: 
+|   cpe:/a:isc:bind:9.11.5-p4-5.1%2Bdeb10u5: 
+|       CVE-2021-25216  9.8     https://vulners.com/cve/CVE-2021-25216
+|       CVE-2020-8616   8.6     https://vulners.com/cve/CVE-2020-8616
+|       CVE-2020-8625   8.1     https://vulners.com/cve/CVE-2020-8625
+|       PACKETSTORM:180550      7.5     https://vulners.com/packetstorm/PACKETSTORM:180550      *EXPLOIT*
+|       MSF:AUXILIARY-DOS-DNS-BIND_TSIG_BADTIME-        7.5     https://vulners.com/metasploit/MSF:AUXILIARY-DOS-DNS-BIND_TSIG_BADTIME- *EXPLOIT*
+|       FBC03933-7A65-52F3-83F4-4B2253A490B6    7.5     https://vulners.com/githubexploit/FBC03933-7A65-52F3-83F4-4B2253A490B6  *EXPLOIT*
+|       CVE-2023-50387  7.5     https://vulners.com/cve/CVE-2023-50387
+|       CVE-2023-4408   7.5     https://vulners.com/cve/CVE-2023-4408
+|       CVE-2023-3341   7.5     https://vulners.com/cve/CVE-2023-3341
+|       CVE-2023-2828   7.5     https://vulners.com/cve/CVE-2023-2828
+|       CVE-2022-38178  7.5     https://vulners.com/cve/CVE-2022-38178
+|       CVE-2022-38177  7.5     https://vulners.com/cve/CVE-2022-38177
+|       CVE-2021-25215  7.5     https://vulners.com/cve/CVE-2021-25215
+|       CVE-2020-8623   7.5     https://vulners.com/cve/CVE-2020-8623
+|       CVE-2020-8617   7.5     https://vulners.com/cve/CVE-2020-8617
+|       CVE-2019-6477   7.5     https://vulners.com/cve/CVE-2019-6477
+|       CVE-2019-6468   7.5     https://vulners.com/cve/CVE-2019-6468
+|       CVE-2018-5744   7.5     https://vulners.com/cve/CVE-2018-5744
+|       CVE-2018-5743   7.5     https://vulners.com/cve/CVE-2018-5743
+|       CNVD-2017-12537 7.5     https://vulners.com/cnvd/CNVD-2017-12537
+|       9ED8A03D-FE34-5F77-8C66-C03C9615AF07    7.5     https://vulners.com/gitee/9ED8A03D-FE34-5F77-8C66-C03C9615AF07  *EXPLOIT*
+|       1337DAY-ID-34485        7.5     https://vulners.com/zdt/1337DAY-ID-34485        *EXPLOIT*
+|       CVE-2021-25220  6.8     https://vulners.com/cve/CVE-2021-25220
+|       CVE-2021-25214  6.5     https://vulners.com/cve/CVE-2021-25214
+|       CVE-2020-8622   6.5     https://vulners.com/cve/CVE-2020-8622
+|       CVE-2019-6471   5.9     https://vulners.com/cve/CVE-2019-6471
+|       CVE-2023-5680   5.3     https://vulners.com/cve/CVE-2023-5680
+|       CVE-2022-2795   5.3     https://vulners.com/cve/CVE-2022-2795
+|       CVE-2021-25219  5.3     https://vulners.com/cve/CVE-2021-25219
+|       CVE-2019-6465   5.3     https://vulners.com/cve/CVE-2019-6465
+|       PACKETSTORM:157836      5.0     https://vulners.com/packetstorm/PACKETSTORM:157836      *EXPLOIT*
+|       CVE-2018-5745   4.9     https://vulners.com/cve/CVE-2018-5745
+|_      CVE-2020-8624   4.3     https://vulners.com/cve/CVE-2020-8624
+80/tcp  open  http        nginx 1.14.2
+| vulners: 
+|   nginx 1.14.2: 
+|       F24D1B4E-B7ED-546A-9886-CDE6898D6FA6    9.3     https://vulners.com/gitee/F24D1B4E-B7ED-546A-9886-CDE6898D6FA6  *EXPLOIT*
+|       3F71F065-66D4-541F-A813-9F1A2F2B1D91    8.8     https://vulners.com/githubexploit/3F71F065-66D4-541F-A813-9F1A2F2B1D91  *EXPLOIT*
+|       NGINX:CVE-2018-16845    8.2     https://vulners.com/nginx/NGINX:CVE-2018-16845
+|       NGINX:CVE-2022-41741    7.8     https://vulners.com/nginx/NGINX:CVE-2022-41741
+|       NGINX:CVE-2019-9513     7.8     https://vulners.com/nginx/NGINX:CVE-2019-9513
+|       NGINX:CVE-2019-9511     7.8     https://vulners.com/nginx/NGINX:CVE-2019-9511
+|       NGINX:CVE-2018-16844    7.8     https://vulners.com/nginx/NGINX:CVE-2018-16844
+|       NGINX:CVE-2018-16843    7.8     https://vulners.com/nginx/NGINX:CVE-2018-16843
+|       DF041B2B-2DA7-5262-AABE-9EBD2D535041    7.8     https://vulners.com/githubexploit/DF041B2B-2DA7-5262-AABE-9EBD2D535041  *EXPLOIT*
+|       PACKETSTORM:167720      7.7     https://vulners.com/packetstorm/PACKETSTORM:167720      *EXPLOIT*
+|       NGINX:CVE-2021-23017    7.7     https://vulners.com/nginx/NGINX:CVE-2021-23017
+|       EDB-ID:50973    7.7     https://vulners.com/exploitdb/EDB-ID:50973      *EXPLOIT*
+|       B175E582-6BBF-5D54-AF15-ED3715F757E3    7.7     https://vulners.com/githubexploit/B175E582-6BBF-5D54-AF15-ED3715F757E3  *EXPLOIT*
+|       3D5EF267-25AF-5E36-885B-89F728833A86    7.7     https://vulners.com/githubexploit/3D5EF267-25AF-5E36-885B-89F728833A86  *EXPLOIT*
+|       25F34A51-EB79-5BBC-8262-6F1876067F04    7.7     https://vulners.com/githubexploit/25F34A51-EB79-5BBC-8262-6F1876067F04  *EXPLOIT*
+|       245ACDDD-B1E2-5344-B37D-5B9A0B0A1F0D    7.7     https://vulners.com/githubexploit/245ACDDD-B1E2-5344-B37D-5B9A0B0A1F0D  *EXPLOIT*
+|       1337DAY-ID-37837        7.7     https://vulners.com/zdt/1337DAY-ID-37837        *EXPLOIT*
+|       1337DAY-ID-36300        7.7     https://vulners.com/zdt/1337DAY-ID-36300        *EXPLOIT*
+|       00455CDF-B814-5424-952E-9088FBB2D42D    7.7     https://vulners.com/githubexploit/00455CDF-B814-5424-952E-9088FBB2D42D  *EXPLOIT*
+|       NGINX:CVE-2019-9516     7.5     https://vulners.com/nginx/NGINX:CVE-2019-9516
+|       NGINX:CVE-2022-41742    7.1     https://vulners.com/nginx/NGINX:CVE-2022-41742
+|       NGINX:CVE-2025-53859    6.3     https://vulners.com/nginx/NGINX:CVE-2025-53859
+|       NGINX:CVE-2024-7347     5.7     https://vulners.com/nginx/NGINX:CVE-2024-7347
+|       NGINX:CVE-2025-23419    5.3     https://vulners.com/nginx/NGINX:CVE-2025-23419
+|_      PACKETSTORM:162830      0.0     https://vulners.com/packetstorm/PACKETSTORM:162830      *EXPLOIT*
+|_http-server-header: nginx/1.14.2
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+MAC Address: 02:42:0A:06:06:17 (Unknown)
+Service Info: Host: GRAVEMIND; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 12.94 seconds
+```
+## Parte 2: Uso de GVM para buscar vulnerabilidades
+GVM es parte del conjunto de productos de administración de vulnerabilidades de código abierto producido por Greenbone Networks GmbH. El escáner GVM es uno de los escáneres de vulnerabilidades de código abierto más utilizados. A diferencia de Nmap, GVM utiliza una interfaz gráfica de usuario para iniciar escaneos e informar los resultados del escaneo de vulnerabilidades.
+
+__Paso 1: Verifique la instalación del producto GVM__<br>
+Antes de comenzar cualquier escaneo, es importante verificar que GVM esté instalado correctamente y que los archivos que utiliza para identificar vulnerabilidades estén actualizados.
+
+Verifique la configuración del servicio GVM con el comando sudo gvm-check-setup. Este comando verifica que la configuración se haya completado correctamente y que los archivos necesarios estén disponibles. La verificación marcará cualquier problema que deba solucionarse y proporcionará los comandos que se utilizarán para solucionarlo.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ sudo gvm-check-setup
+```
+Si hay problemas, ejecute el comando sugerido para solucionar el problema y luego vuelva a ejecutar el comando gvm-check-setup. Cuando se abordan todos los problemas, el comando genera “It seems like your GVM [versión] installation is OK.».
+Solo para esta actividad, detenga el servicio de GVM para poder observar el resultado de inicio.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ sudo gvm-stop
+```
+__Paso 2: Abra la GUI del escáner GVM__<br>
+Inicie el escáner GVM con el comando sudo gvm-start . También puede acceder al guion gvm-start mediante el menú Applications (Aplicaciones) en el escritorio de Kali, Kali -> 02-Vulnerability Analysis -> gvm start. Es posible que GVM ya se esté ejecutando como resultado del proceso de configuración de la verificación.
+La salida del comando debe ser similar a la que se muestra a continuación. Al final del resultado, aparecerá un mensaje de que el escáner se está cargando en Firefox.
+<!-- sudo gvm-start -->
+```bash
+┌──(root㉿Kali)-[/home/kali]
+└─# gvm-start
+[>] Please wait for the GVM services to start.
+[>]
+[>] You might need to refresh your browser once it opens.
+[>]
+[>]  Web UI (Greenbone Security Assistant): https://127.0.0.1:9392
+
+● gsad.service - Greenbone Security Assistant daemon (gsad)
+     Loaded: loaded (/lib/systemd/system/gsad.service; disabled; preset: disabled)
+     Active: active (running) since Fri 2025-11-21 22:22:07 UTC; 16ms ago
+       Docs: man:gsad(8)
+             https://www.greenbone.net
+   Main PID: 19244 (gsad)
+      Tasks: 1 (limit: 4600)
+     Memory: 1.4M
+        CPU: 5ms
+     CGroup: /system.slice/gsad.service
+             └─19244 /usr/sbin/gsad --foreground --listen 127.0.0.1 --port 9392
+
+Nov 21 22:22:07 Kali systemd[1]: Starting gsad.service - Greenbone Security Assistant daemon (gsad)...
+Nov 21 22:22:07 Kali systemd[1]: Started gsad.service - Greenbone Security Assistant daemon (gsad).
+
+● gvmd.service - Greenbone Vulnerability Manager daemon (gvmd)
+     Loaded: loaded (/lib/systemd/system/gvmd.service; disabled; preset: disabled)
+     Active: active (running) since Fri 2025-11-21 22:22:02 UTC; 5s ago
+       Docs: man:gvmd(8)
+    Process: 19161 ExecStart=/usr/sbin/gvmd --osp-vt-update=/run/ospd/ospd.sock --listen-group=_gvm (code=exited, status=0/SUCCESS)
+   Main PID: 19162 (gvmd)
+      Tasks: 1 (limit: 4600)
+     Memory: 179.1M
+        CPU: 839ms
+     CGroup: /system.slice/gvmd.service
+             └─19162 "gvmd: gvmd: Wa" --osp-vt-update=/run/ospd/ospd.sock --listen-group=_gvm
+
+Nov 21 22:22:00 Kali systemd[1]: Starting gvmd.service - Greenbone Vulnerability Manager daemon (gvmd)...
+Nov 21 22:22:00 Kali systemd[1]: gvmd.service: Can't open PID file /run/gvmd/gvmd.pid (yet?) after start: No such file or directory
+Nov 21 22:22:02 Kali systemd[1]: Started gvmd.service - Greenbone Vulnerability Manager daemon (gvmd).
+
+● ospd-openvas.service - OSPd Wrapper for the OpenVAS Scanner (ospd-openvas)
+     Loaded: loaded (/lib/systemd/system/ospd-openvas.service; disabled; preset: disabled)
+     Active: active (running) since Fri 2025-11-21 22:22:00 UTC; 6s ago
+       Docs: man:ospd-openvas(8)
+             man:openvas(8)
+    Process: 19134 ExecStart=/usr/bin/ospd-openvas --config /etc/gvm/ospd-openvas.conf --log-config /etc/gvm/ospd-logging.conf (code=exited, status=0/SUCCESS)
+   Main PID: 19149 (ospd-openvas)
+      Tasks: 5 (limit: 4600)
+     Memory: 48.6M
+        CPU: 741ms
+     CGroup: /system.slice/ospd-openvas.service
+             ├─19149 /usr/bin/python3 /usr/bin/ospd-openvas --config /etc/gvm/ospd-openvas.conf --log-config /etc/gvm/ospd-logging.conf
+             └─19153 /usr/bin/python3 /usr/bin/ospd-openvas --config /etc/gvm/ospd-openvas.conf --log-config /etc/gvm/ospd-logging.conf
+
+Nov 21 22:21:59 Kali systemd[1]: Starting ospd-openvas.service - OSPd Wrapper for the OpenVAS Scanner (ospd-openvas)...
+Nov 21 22:22:00 Kali systemd[1]: Started ospd-openvas.service - OSPd Wrapper for the OpenVAS Scanner (ospd-openvas).
+
+[>] Opening Web UI (https://127.0.0.1:9392) in: 5... 4... 3... 2... 1...
+```
+Se abrirá una ventana del navegador con una advertencia de seguridad que puede ignorarse. Si el navegador no se abre automáticamente, inícielo manualmente y vaya a https://127.0.0.1:9392. Haga clic en el botón Advanced, desplácese hacia abajo y acepte el riesgo en la pantalla de advertencia para continuar.
+En el cuadro de inicio de sesión de Greenbone Security Assistant, ingrese admin como nombre de usuario y kali como contraseña.
+```
+Username: admin
+Password: kali
+```
+La GUI de la aplicación GVM Scanner debe abrirse en el navegador. Seleccione Scans -> Tasks en la barra de menús. En la parte superior izquierda de la ventana Tasks aparecen tres iconos. Seleccione el icono Task Wizard que parece una varita mágica. Seleccione Task Wizard en el menú desplegable.
+
+__Paso 3: Escanee el host de destino en busca de vulnerabilidades__<br>
+En este paso, analizará el mismo equipo de destino en busca de vulnerabilidades que hizo con el escaneo de Nmap anterior.
+
+- En el cuadro IP address or hostname, introduzca la dirección IP *10.6.6.23* o *gravemind.vm*. Haga clic en *Start Scan*, en la parte inferior de la pantalla. el escaneo llevará unos minutos, así que espere a que se complete. El estado y el porcentaje completado se muestran en la pantalla. El escaneo finalizará cuando el estado cambie a Done.
+- Haga clic en el número debajo de la columna *Reports* mientras se está ejecutando el escaneo para el escaneo asociado.
+- Cuando finalice el escaneo, haga clic en la marca de tiempo en la columna *Date* para ver el detalle del informe.
+- Las CVE asociadas con las vulnerabilidades que se encontraron en el host se pueden ver haciendo clic en la ficha CVE. Explore las otras pestañas.
+- Descargue el informe haciendo clic en el botón *Download Filtered Report* del menú en la parte superior izquierda de la página del informe. Tiene un icono de flecha que apunta hacia abajo. En el cuadro de configuración, elija descargar el informe en formato PDF. Después de una breve demora, el archivo PDF debería abrirse en su navegador.
+
+__Paso 4: Limpieza__<br>
+Cuando haya terminado con los servicios de GVM, use el siguiente comando para detener GVM.
+```bash
+┌──(kali㉿Kali)-[~]
+└─$ sudo gvm-stop
+```
+## Desafios a tener en cuenta al ejecutar un análisis de vulnerabilidades
+Las secciones anteriores han abordado una serie de cosas diferentes que deben tener en cuenta la forma en que realiza el escaneo. Las secciones siguientes brindan más detalles sobre algunas de las cuestiones específicas que debe tener en cuenta al crear una política de escaneo y realizar los escaneos. Para obtener más información, seleccione cada uno de los siguientes desafíos para tener en cuenta.
+
+__Consideración del mejor momento para realizar un escaneo__<br>
+El momento en el que se debe ejecutar un escaneo suele ser lo más preocupante cuando se analiza una red de producción. Si está escaneando un dispositivo en un entorno de laboratorio, normalmente no hay mucha preocupación porque el entorno de laboratorio no está siendo utilizado por aplicaciones críticas. Hay algunas razones por las que la ejecución de un escaneo en una red de producción debe realizarse con cuidado. En primer lugar, el tráfico de red generado por un escaneo de vulnerabilidades puede causar y causará mucho ruido en la red. También puede causar una congestión significativa, especialmente cuando los escaneos atraviesan varios saltos de red. (Hablaremos de esto en breve).
+
+Otra consideración al elegir un momento para ejecutar un escaneo es el hecho de que muchas de las opciones o complementos que se realizan en un escaneo de vulnerabilidades pueden bloquear el dispositivo objetivo y la infraestructura de la red. Por este motivo, debe asegurarse de que, al escanear en una red de producción, lo haga en los momentos que tendrán el menor impacto posible en los usuarios finales y los servidores. La mayoría de las veces, es mejor escanear en las primeras horas del día, cuando nadie está usando la red para fines críticos.
+
+__Determinar que protocolos están en uso__<br>
+Una de las primeras cosas que debe saber sobre una red o un dispositivo de destino antes de comenzar a ejecutar escaneo de vulnerabilidades es qué protocolos se utilizan. Si un dispositivo de destino utiliza protocolos TCP y UDP para los servicios en ejecución, y solo ejecuta un escaneo de vulnerabilidades en los puertos TCP, se perderán las vulnerabilidades que puedan encontrarse en los servicios UDP.
+
+__Topología de la red__<br>
+omo se mencionó anteriormente, la topología de la red siempre debe considerarse cuando se trata del escaneo de vulnerabilidades. Por supuesto, nunca se recomienda escanear a través de una conexión WAN porque afectaría significativamente a cualquiera de los dispositivos a lo largo de la ruta. La regla general al determinar en qué parte de la topología de la red se debe ejecutar un escaneo de vulnerabilidades es que siempre se debe realizar lo más cerca posible del objetivo. Por ejemplo, si está escaneando un servidor de Windows que se encuentra dentro de su subred filtrada (anteriormente conocida como zona desmilitarizada o DMZ), la mejor ubicación para el escáner de vulnerabilidades es junto al servidor en la subred filtrada. Al colocarlo allí, puede eliminar cualquier preocupación sobre el impacto de los dispositivos que atraviesa el tráfico de su escáner.
+Además del impacto en la infraestructura de la red, otra preocupación es que cualquier dispositivo que atraviese también podría afectar los resultados del escáner. Esto es más preocupante al atravesar un dispositivo de cortafuegos; Además, otros dispositivos de la infraestructura de red también podrían afectar los resultados.
+
+__Limitaciones del ancho de banda__<br>
+Tomemos un momento para considerar los efectos de las limitaciones de ancho de banda en el escaneo de vulnerabilidades. Obviamente, cada vez que inunde una red con una gran cantidad de tráfico, se producirá un problema con la cantidad de ancho de banda disponible. Como profesional de pruebas de penetración, debe conocer cómo afecta el ancho de banda de las redes o los sistemas que está escaneando. Específicamente, según la cantidad de ancho de banda que tenga entre el escáner y el objetivo, es posible que deba ajustar la configuración del escáner para adaptarse a situaciones de menor ancho de banda. Si está escaneando un enlace de VPN o WAN que probablemente tenga un ancho de banda limitado, querrá ajustar sus opciones de escaneo para no causar problemas de consumo de ancho de banda. Las configuraciones que deben ajustarse suelen ser las relacionadas con los ataques de tipo desbordamiento y denegación de servicio (DoS).
+
+__Limitación de consultas__<br>
+Para solucionar el problema de las limitaciones de ancho de banda y el escaneo de vulnerabilidades, a menudo puede ser útil ralentizar el tráfico creado por el escáner. Esto a menudo se denomina limitación de consultas y, por lo general, se puede lograr modificando las opciones de la política de escaneo. Una forma de hacerlo es reducir la cantidad de subprocesos de ataque que se envían al objetivo al mismo tiempo. No hay una regla general específica para la cantidad de subprocesos. Realmente depende de la solidez del objetivo. Algunos objetivos son más frágiles que otros. Otra forma de lograr esto es reducir el alcance de los complementos/ataques que el escáner está buscando. Si sabe que el dispositivo de destino es un servidor Linux, puede deshabilitar los ataques para otros sistemas operativos, como Windows. Aunque los ataques no funcionarán contra el servidor Linux, aún necesita recibir y responder al tráfico. Este tráfico adicional puede causar un cuello de botella en el procesamiento y el consumo de tráfico de red. Limitar la cantidad de solicitudes a las que el objetivo debería responder reduciría el riesgo de causar problemas, como bloquearse en el objetivo, y dar como resultado un escaneo más exitoso.
+
+__Sistemas frágiles/activos no tradicionales__
+Al utilizar un escáner de vulnerabilidades en su red interna, debe tener en cuenta los dispositivos de la red que podrían no resistir el tráfico que les arroja un escáner de vulnerabilidades. Para estos sistemas, es posible que deba ajustar las opciones de escaneo para reducir el riesgo de bloqueo de los dispositivos o eximir por completo los dispositivos específicos del escaneo. Desafortunadamente, al eximir los dispositivos específicos, se reduce la seguridad general del entorno.
+
+Las impresoras a menudo se consideran "sistemas frágiles". Históricamente, han sido dispositivos que no han podido resistir los intentos de escaneo de vulnerabilidades. Con el aumento de los dispositivos de IoT, hoy en día hay muchos más dispositivos que pueden considerarse frágiles y debe tenerlos en cuenta al planificar el escaneo de vulnerabilidades. La forma típica de abordar los dispositivos frágiles es eximirlos de un escaneo; sin embargo, estos dispositivos pueden suponer un riesgo para el entorno y deben analizarse. Para solucionar este problema, puede "limitar" la frecuencia de escaneo y las opciones utilizadas en la política de escaneo para reducir la probabilidad de que el dispositivo falle.

@@ -31,10 +31,27 @@ En algunos casos, es mejor ejecutar un escaneo autenticado contra un objetivo pa
 - _Ejemplo de netstat sin acceso root_
 <!-- netsat -tunap -->
 ```bash
+┌──(kali㉿Kali)-[~]
+└─$ netstat -tunap
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+tcp6       0      0 :::22                   :::*                    LISTEN      -                   
+udp        0      0 10.0.2.15:68            10.0.2.2:67             ESTABLISHED -
 ```
 - _Ejemplo de netstat con acceso root_
 <!-- sudo netstat -tunap -->
 ```bash
+┌──(kali㉿Kali)-[~]
+└─$ sudo netstat -tunap
+[sudo] password for kali: 
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      689/sshd: /usr/sbin 
+tcp6       0      0 :::22                   :::*                    LISTEN      689/sshd: /usr/sbin 
+udp        0      0 10.0.2.15:68            10.0.2.2:67             ESTABLISHED 592/NetworkManager
 ```
 __Escaneo de descubrimiento__
 Un escaneo de descubrimiento está destinado principalmente a identificar la superficie de ataque de un objetivo. Un escaneo de puertos es una parte importante de lo que realiza un escaneos de descubrimiento. Un escáner puede usar una herramienta como Nmap para realizar el proceso de escaneo de puertos. Luego, extrae los resultados del escaneo de puertos en su base de datos para usar esa información en un mayor descubrimiento. Por ejemplo, el resultado del escaneo de puertos puede mostrar que los puertos 80, 22 y 443 están abiertos y escuchando. A partir de ahí, la herramienta de escaneo prueba esos puertos para identificar exactamente qué servicio se está ejecutando en cada puerto. Por ejemplo, supongamos que identifica que un servidor web Apache Tomcat 8.5.22 se ejecuta en los puertos 80 y 443. Sabiendo que un servidor web se está ejecutando en los puertos, el escáner puede realizar más tareas de detección que son específicas de los servidores web y las aplicaciones. Ahora digamos que, al mismo tiempo, el escáner identifica que OpenSSH está escuchando en el puerto 22. Desde allí, el escáner puede sondear el servicio SSH para identificar información sobre su configuración y capacidades, como algoritmos criptográficos preferidos y admitidos. Este tipo de información es útil para identificar vulnerabilidades en fases posteriores de pruebas. <br>
